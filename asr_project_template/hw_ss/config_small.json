@@ -1,0 +1,166 @@
+{
+    "name": "default_config",
+    "n_gpu": 1,
+    "preprocessing": {
+      "sr": 16000,
+      "spectrogram": {
+        "type": "MelSpectrogram",
+        "args": {
+          "n_mels": 80,
+          "hop_length": 160
+        }
+      },
+      "log_spec": true
+    },
+    "augmentations": {
+      "wave": [],
+      "spectrogram": [
+        {
+          "type": "TimeMasking",
+          "args": {
+            "p": 0.05
+          }
+        },
+        {
+          "type": "FrequencyMasking",
+          "args": {
+            "p": 0.5
+          }
+        }
+      ]
+    },
+    "arch": {
+      "type": "Conformer",
+      "args": {
+        "input_dim": 80,
+        "d_encoder": 144,
+        "ffl_exp_factor": 2,
+        "conv_exp_factor": 2,
+        "ffl_dropout": 0.1,
+        "conv_dropout": 0.1,
+        "attention_dropout": 0.1,
+        "conv_kernel_size": 31,
+        "num_classes": 28,
+        "num_encoder_layers": 8,
+        "num_heads_attention": 4,
+        "hidden_size_decoder": 120,
+        "num_decoder_layers": 1
+      }
+    },
+    "data": {
+      "train": {
+        "batch_size": 32,
+        "num_workers": 5,
+        "datasets": [
+          {
+            "type": "LibrispeechDataset",
+            "args": {
+              "part": "train-clean-100",
+              "max_audio_length": 20.0,
+              "max_text_length": 300,
+              "data_dir": "/kaggle/input/librispeech-asr-wav-dataset"
+            }
+          },
+          {
+            "type": "LibrispeechDataset",
+            "args": {
+              "part": "train-clean-360",
+              "max_audio_length": 20.0,
+              "max_text_length": 300,
+              "data_dir": "/kaggle/input/librispeech-asr-wav-dataset"
+            }
+          }
+        ]
+      },
+      "val": {
+        "batch_size": 32,
+        "num_workers": 5,
+        "datasets": [
+          {
+            "type": "LibrispeechDataset",
+            "args": {
+              "part": "dev-clean",
+              "data_dir": "/kaggle/input/librispeech-asr-wav-dataset"
+            }
+          }
+        ]
+      },
+      "test-clean": {
+        "batch_size": 32,
+        "num_workers": 5,
+        "datasets": [
+          {
+            "type": "LibrispeechDataset",
+            "args": {
+              "part": "test-clean",
+              "data_dir": "/kaggle/input/librispeech-asr-wav-dataset"
+            }
+          }
+        ]
+      }
+    },
+    "optimizer": {
+      "type": "AdamW",
+      "args": {
+        "lr": 4e-5,
+        "eps": 1e-9,
+        "betas":[0.9, 0.98],
+        "weight_decay": 1e-3
+      }
+    },
+    "warmup": "False",
+    "warmup_steps": 10000,
+    "use_beam_search": "False",
+    "loss": {
+      "type": "CTCLoss",
+      "args": {}
+    },
+    "metrics": [
+      {
+        "type": "ArgmaxWERMetric",
+        "args": {
+          "name": "WER (argmax)"
+        }
+      },
+      {
+        "type": "ArgmaxCERMetric",
+        "args": {
+          "name": "CER (argmax)"
+        }
+      },
+      {
+        "type": "BeamSearchCER",
+        "args": {
+          "name": "CER (beam)"
+        }
+      },
+      {
+        "type": "BeamSearchWER",
+        "args": {
+          "name": "WER (beam)"
+        }
+      }
+    ],
+    "lr_scheduler": {
+      "type": "CosineAnnealingLR",
+      "args": {
+        "T_max": 10000,
+        "eta_min": 4e-5
+      }
+    },
+    "wandb_project_name": "Yanformer_unStable_Cosine",
+    "trainer": {
+      "epochs": 150,
+      "save_dir": "saved/",
+      "save_period": 5,
+      "verbosity": 2,
+      "monitor": "min val_loss",
+      "early_stop": 100,
+      "visualize": "wandb",
+      "wandb_project": "asr_project",
+      "len_epoch": 200,
+      "grad_norm_clip": 10,
+      "accum_steps": 4
+    }
+  }
+  

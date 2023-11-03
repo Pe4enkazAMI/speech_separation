@@ -1,0 +1,124 @@
+{
+  "name": "one_batch_test",
+  "n_gpu": 1,
+  "preprocessing": {
+    "sr": 16000,
+    "spectrogram": {
+      "type": "MelSpectrogram",
+      "args": {
+      }
+    },
+    "log_spec": true
+  },
+  "augmentations": {
+    "wave": [],
+    "spectrogram": []
+  },
+  "arch": {
+    "type": "Conformer",
+    "args": {
+      "input_dim": 128,
+      "d_encoder": 144,
+      "ffl_exp_factor": 2,
+      "conv_exp_factor": 2,
+      "ffl_dropout": 0.1,
+      "conv_dropout": 0.1,
+      "attention_dropout": 0.1,
+      "conv_kernel_size": 31,
+      "num_classes": 28,
+      "num_encoder_layers": 1,
+      "num_heads_attention": 2,
+      "hidden_size_decoder": 100,
+      "num_decoder_layers": 1
+    }
+  },
+  "data": {
+    "train": {
+      "batch_sampler":
+        {
+          "type": "GroupLengthBatchSampler",
+          "args": {}
+        },
+      "num_workers": 0,
+      "datasets": [
+        {
+          "type": "LibrispeechDataset",
+          "args": {
+            "part": "dev-clean",
+            "max_audio_length": 20.0,
+            "max_text_length": 200,
+            "limit": 10
+          }
+        }
+      ]
+    },
+    "val": {
+      "batch_sampler":
+        {
+          "type": "GroupLengthBatchSampler",
+          "args": {}
+        },
+      "num_workers": 0,
+      "datasets": [
+        {
+          "type": "LibrispeechDataset",
+          "args": {
+            "part": "dev-clean",
+            "max_audio_length": 20.0,
+            "max_text_length": 200,
+            "limit": 10
+          }
+        }
+      ]
+    }
+  },
+  "optimizer": {
+    "type": "Adam",
+    "args": {
+      "lr": 3e-4
+    }
+  },
+  "warmup": "True",
+  "warmup_steps": 10000,
+  "loss": {
+    "type": "CTCLoss",
+    "args": {}
+  },
+  "metrics": [
+    {
+      "type": "ArgmaxWERMetric",
+      "args": {
+        "name": "WER (argmax)"
+      }
+    },
+    {
+      "type": "ArgmaxCERMetric",
+      "args": {
+        "name": "CER (argmax)"
+      }
+    }
+  ],
+  "lr_scheduler": {
+    "type": "OneCycleLR",
+    "args": {
+      "steps_per_epoch": 100,
+      "epochs": 50,
+      "anneal_strategy": "cos",
+      "max_lr": 1e-2,
+      "pct_start": 0.2
+    }
+  },
+  "wandb_project_name" : "BatchSamplerTest",
+  "trainer": {
+    "epochs": 50,
+    "save_dir": "saved/",
+    "save_period": 5,
+    "verbosity": 2,
+    "monitor": "min val_loss",
+    "early_stop": 100,
+    "visualize": "wandb",
+    "wandb_project": "asr_project",
+    "len_epoch": 100,
+    "grad_norm_clip": 10
+  }
+}
