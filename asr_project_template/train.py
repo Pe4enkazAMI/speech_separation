@@ -27,9 +27,9 @@ def main(config):
     logger = config.get_logger("train")
 
     # text_encoder
-
+    mixer = config.get("Mixer")
     # setup data_loader instances
-    dataloaders = get_dataloaders(config)
+    dataloaders = get_dataloaders(config, mixer)
 
     # build model architecture, then print to console
     model = config.init_obj(config["arch"], module_arch)

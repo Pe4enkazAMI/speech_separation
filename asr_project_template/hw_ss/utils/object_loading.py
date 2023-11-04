@@ -10,7 +10,7 @@ from hw_ss.collate_fn.collate import collate_fn
 from hw_ss.utils.parse_config import ConfigParser
 
 
-def get_dataloaders(configs: ConfigParser):
+def get_dataloaders(configs: ConfigParser, mixer):
     dataloaders = {}
     for split, params in configs["data"].items():
         num_workers = params.get("num_workers", 1)
@@ -28,7 +28,7 @@ def get_dataloaders(configs: ConfigParser):
         for ds in params["datasets"]:
             datasets.append(configs.init_obj(
                 ds, hw_ss.datasets_, config_parser=configs,
-                wave_augs=wave_augs, index_path=ds["index_path"]))
+                wave_augs=wave_augs, index_path=ds["index_path"]), mixer)
         assert len(datasets)
         if len(datasets) > 1:
             dataset = ConcatDataset(datasets)
