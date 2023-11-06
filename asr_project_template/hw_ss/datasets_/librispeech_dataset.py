@@ -129,7 +129,7 @@ URL_LINKS = {
 
 class LibrispeechDataset(BaseDataset):
     def __init__(self, part, data_dir=None, mixer=None, index_path=None, *args, **kwargs):
-        assert part in URL_LINKS or part == 'train_all'
+        # assert part in URL_LINKS or part == 'train_all'
 
         if data_dir is None:
             data_dir = ROOT_PATH / "data" / "datasets" / "librispeech"
