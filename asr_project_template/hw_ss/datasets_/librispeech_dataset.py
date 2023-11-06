@@ -181,7 +181,7 @@ class LibrispeechDataset(BaseDataset):
                 **mixer
             )
         else:
-            mix_path = self._data_dir / part
+            mix_path = Path(self._data_dir) / Path(part)
 
         
         ref = sorted(glob.glob(os.path.join(mix_path, "*-ref.wav")))
