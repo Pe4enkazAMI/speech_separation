@@ -26,8 +26,8 @@ def collate_fn(dataset_items: List[dict]):
     speaker_ids = [item["speaker_id"] for item in dataset_items]
 
     audios_ref = pad_sequence([item["audio_ref"].squeeze(0) for item in dataset_items], batch_first=True)
-    audios_mix = pad_sequence(audio_mix, batch_first=True)
-    audios_target = pad_sequence(audio_target, batch_first=True)
+    audios_mix = pad_sequence([item["audio_mix"].squeeze(0) for item in dataset_items], batch_first=True)
+    audios_target = pad_sequence([item["audio_target"].squeeze(0) for item in dataset_items], batch_first=True)
         
     result_batch = {
         "audio_mix": audios_mix.unsqueeze(1),
