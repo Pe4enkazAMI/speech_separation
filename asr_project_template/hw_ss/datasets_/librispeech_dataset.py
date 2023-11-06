@@ -163,7 +163,7 @@ class LibrispeechDataset(BaseDataset):
                 index = json.load(f)
         else:
             index = self._create_index(part, mixer)
-            index_path = self._data_dir / f"{part}_mix_index.json"
+            index_path = Path(self._data_dir) / Path(f"{part}_mix_index.json")
             with index_path.open("w") as f:
                 json.dump(index, f, indent=2)
         return index
