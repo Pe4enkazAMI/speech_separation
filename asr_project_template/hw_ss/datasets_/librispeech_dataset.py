@@ -169,7 +169,7 @@ class LibrispeechDataset(BaseDataset):
         return index
     
     def _create_index(self, part, mixer):
-        if mixer["path_to_mixes"] is "None":
+        if self._data_dir is Path("None"):
             index = []
             split_dir = self._data_dir / part
             speaker_id = [f.name for f in os.scandir(split_dir)]
@@ -181,7 +181,7 @@ class LibrispeechDataset(BaseDataset):
                 **mixer
             )
         else:
-            mix_path = mixer["path_to_mixes"]
+            mix_path = self._data_dir / part
 
         
         ref = sorted(glob.glob(os.path.join(mix_path, "*-ref.wav")))
