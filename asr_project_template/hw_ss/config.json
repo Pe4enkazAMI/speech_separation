@@ -99,7 +99,7 @@
       "patience": 2
     }
   },
-  "wandb_project_name": "SpEXPlus_one_batch",
+  "wandb_project_name": "SpEXPlus_NightRun_Tue/7th/November",
   "trainer": {
     "epochs": 100,
     "save_dir": "saved/",
@@ -110,6 +110,6 @@
     "visualize": "wandb",
     "wandb_project": "ss_project",
     "len_epoch": 1000,
-    "grad_norm_clip": 100
+    "grad_norm_clip": 90
   }
 }
