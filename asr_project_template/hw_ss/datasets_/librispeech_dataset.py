@@ -134,7 +134,13 @@ class LibrispeechDataset(BaseDataset):
         if data_dir is None:
             data_dir = ROOT_PATH / "data" / "datasets" / "librispeech"
             data_dir.mkdir(exist_ok=True, parents=True)
+
         self._data_dir = data_dir
+
+        if index_path is not None:
+            index_path = Path(index_path)
+        else: 
+            index_path = self._data_dir
         index = self._get_or_load_index(part, index_path, mixer)
 
         super().__init__(index, *args, **kwargs)
@@ -150,34 +156,43 @@ class LibrispeechDataset(BaseDataset):
         shutil.rmtree(str(self._data_dir / "LibriSpeech"))
 
     def _get_or_load_index(self, part, index_path, mixer):
-        index_path = index_path + f"{part}_mix_index.json"
+        
+        index_path = index_path / f"{part}_mix_index.json"
         if index_path.exists():
             with index_path.open() as f:
                 index = json.load(f)
         else:
             index = self._create_index(part, mixer)
+            index_path = self._data_dir / f"{part}_mix_index.json"
             with index_path.open("w") as f:
                 json.dump(index, f, indent=2)
         return index
     
     def _create_index(self, part, mixer):
-        index = []
-        split_dir = self._data_dir / part
-        speaker_id = [f.name for f in os.scandir(split_dir)]
-        spk_files = [LibriSpeechSpeakerFiles(name, split_dir, "*.flac") for name in speaker_id]
-        mix_path = self._data_dir / f"{part}-mix" 
-        mix_path.mkdir(exist_ok=True, parents=True)
-        mixer_ = MixtureGenerator(speakers_files=spk_files, out_folder=mix_path, nfiles=150)
-
-        mixer_.generate_mixes(
-            **mixer
-        )
+        if mixer["path_to_mixes"] is "None":
+            index = []
+            split_dir = self._data_dir / part
+            speaker_id = [f.name for f in os.scandir(split_dir)]
+            spk_files = [LibriSpeechSpeakerFiles(name, split_dir, "*.flac") for name in speaker_id]
+            mix_path = self._data_dir / f"{part}-mix" 
+            mix_path.mkdir(exist_ok=True, parents=True)
+            mixer_ = MixtureGenerator(speakers_files=spk_files, out_folder=mix_path, nfiles=mixer["nfiles"])
+            mixer_.generate_mixes(
+                **mixer
+            )
+        else:
+            mix_path = mixer["path_to_mixes"]
 
         
-        ref = sorted(glob(os.path.join(mix_path, "*-ref.wav")))
-        target = sorted(glob(os.path.join(mix_path, "*-target.wav")))
-        mix = sorted(glob(os.path.join(mix_path, "*-mixed.wav")))
-        id_ = [int(r.split("_")[0]) for r in ref]
+        ref = sorted(glob.glob(os.path.join(mix_path, "*-ref.wav")))
+        target = sorted(glob.glob(os.path.join(mix_path, "*-target.wav")))
+        mix = sorted(glob.glob(os.path.join(mix_path, "*-mixed.wav")))
+        id_ = [int(r.split("/")[-1].split("_")[0]) for r in ref]
+
+        setik = list(set(id_))
+
+        mapid = {
+            true_value: maped_id for maped_id, true_value in enumerate(setik)}
 
         for i in range(len(id_)):
             index += [
@@ -185,10 +200,12 @@ class LibrispeechDataset(BaseDataset):
                     "mix": mix[i],
                     "target": target[i],
                     "reference": ref[i],
-                    "speaker_id": id_[i]
-
+                    "speaker_id": mapid[id_[i]],
+                    "true_speaker_id": id_[i],
+                    "audio_len": mixer["audioLen"],
                 }
             ]
+        return index
 
 
 

@@ -27,7 +27,7 @@ def main(config):
     logger = config.get_logger("train")
 
     # text_encoder
-    mixer = config.get("Mixer")
+    mixer = config["Mixer"]
     # setup data_loader instances
     dataloaders = get_dataloaders(config, mixer)
 

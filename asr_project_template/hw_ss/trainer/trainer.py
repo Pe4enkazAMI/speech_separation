@@ -9,11 +9,12 @@ import torch.nn.functional as F
 from torch.nn.utils import clip_grad_norm_
 from torchvision.transforms import ToTensor
 from tqdm import tqdm
+import pyloudnorm as pyln
 
 from hw_ss.base import BaseTrainer
 from hw_ss.base.base_text_encoder import BaseTextEncoder
 from hw_ss.logger.utils import plot_spectrogram_to_buf
-from hw_ss.metric.utils import calc_cer, calc_wer
+from hw_ss.metric.utils import calc_sisdr
 from hw_ss.utils import inf_loop, MetricTracker
 
 class Trainer(BaseTrainer):
@@ -56,13 +57,14 @@ class Trainer(BaseTrainer):
         self.evaluation_metrics = MetricTracker(
             "loss", *[m.name for m in self.metrics], writer=self.writer
         )
+        self.meter = pyln.Meter(16000)
 
     @staticmethod
     def move_batch_to_device(batch, device: torch.device):
         """
-        Move all necessary tensors to the HPU
+        Move all necessary tensors to the GPU
         """
-        for tensor_for_gpu in ["spectrogram", "text_encoded"]:
+        for tensor_for_gpu in ["audio_mix", "audio_ref", "audio_target", "speaker_id"]:
             batch[tensor_for_gpu] = batch[tensor_for_gpu].to(device)
         return batch
 
@@ -71,6 +73,10 @@ class Trainer(BaseTrainer):
             clip_grad_norm_(
                 self.model.parameters(), self.config["trainer"]["grad_norm_clip"]
             )
+
+    def _get_lr(self, optim):
+        for param_group in optim.param_groups:
+            return param_group["lr"]
 
     def _train_epoch(self, epoch):
         """
@@ -111,15 +117,15 @@ class Trainer(BaseTrainer):
                         epoch, self._progress(batch_idx), batch["loss"].item()
                     )
                 )
-                if self.lr_scheduler is not None:
+                if self.lr_scheduler is not None and hasattr(self.lr_scheduler, "get_last_lr"):
                     self.writer.add_scalar(
                         "learning rate", self.lr_scheduler.get_last_lr()[0]
                     )
                 else:
                     self.writer.add_scalar(
-                        "learning rate", self.optimizer.get_lr()
+                        "learning rate", self._get_lr(self.optimizer)
                     )
-                self._log_predictions(**batch, is_train=True)
+                self._log_predictions(**batch, epoch=epoch)
                 self._log_scalars(self.train_metrics)
                 # we don't want to reset train metrics at the start of every epoch
                 # because we are interested in recent train metrics
@@ -139,7 +145,9 @@ class Trainer(BaseTrainer):
         batch = self.move_batch_to_device(batch, self.device)
         # if is_train:
         #     self.optimizer.zero_grad()
-        s1, s2, s3, logits = self.model(batch["audio_mix"], batch["audio_ref"])
+        if is_train:
+            self.optimizer.zero_grad()
+        s1, s2, s3, logits = self.model(batch["audio_mix"], batch["audio_ref"], batch["audio_ref_len"])
         batch["source_1"] = s1
         batch["source_2"] = s2
         batch["source_3"] = s3
@@ -147,12 +155,11 @@ class Trainer(BaseTrainer):
         batch["loss"] = self.criterion(batch)
         if is_train:
             batch["loss"].backward()
-            if (index + 1) % self.accum_steps == 0 or index + 1 == self.len_epoch:
-                self._clip_grad_norm()
-                self.optimizer.step()
-                if self.lr_scheduler is not None:
-                    self.lr_scheduler.step()
-                self.optimizer.zero_grad()
+            self._clip_grad_norm()
+            self.optimizer.step()
+            if self.lr_scheduler is not None and index == self.len_epoch:
+                self.lr_scheduler.step(batch["loss"].item())
+            
 
         metrics.update("loss", batch["loss"].item())
         for met in self.metrics:
@@ -182,7 +189,7 @@ class Trainer(BaseTrainer):
                 )
             self.writer.set_step(epoch * self.len_epoch, part)
             self._log_scalars(self.evaluation_metrics)
-            self._log_predictions(**batch, is_train=False)
+            self._log_predictions(**batch, epoch=epoch)
 
         return self.evaluation_metrics.result()
 
@@ -205,13 +212,12 @@ class Trainer(BaseTrainer):
             audio_ref,
             audio_target,
             speaker_id,
-            mix_path,
+            audio_path_mix,
             examples_to_log=10,
-            is_train = True,
+            epoch=None,
             *args,
             **kwargs,
     ):
-        # TODO: implement logging of beam search results
         if self.writer is None:
             return
 
@@ -221,20 +227,25 @@ class Trainer(BaseTrainer):
                              source_3,
                                audio_mix,
                                  audio_ref,
-                                   audio_target, mix_path, speaker_id))
+                                   audio_target, audio_path_mix, speaker_id))
         
         
             
         shuffle(tuples)
         rows = {}
         
-        for source_1, source_2, source_3, audio_mix, audio_ref, audio_target, speaker_id in tuples[:examples_to_log]:
-            
-            rows[Path(mix_path).name] = {
-                "orig_audio": self.writer.wandb.Audio(audio_target),
-                "extracted_audio": self.writer.wandb.Audio(source_1.numpy(), sample_rate=16000),
-                "reference_audio": audio_ref,
-                "speaker id": speaker_id,
+        for source_1, source_2, source_3, audio_mix, audio_ref, audio_target, audio_path_mix, speaker_id in tuples[:examples_to_log]:
+            sisdr = calc_sisdr(source_1, audio_target)
+            louds1 = self.meter.integrated_loudness(source_1.squeeze(0).cpu().detach().numpy())
+            source = pyln.normalize.loudness(source_1.squeeze(0).cpu().detach().numpy(), louds1, -29)
+            rows[Path(audio_path_mix).name] = {
+                "mix_audio": self.writer.wandb.Audio(audio_mix.squeeze(0).cpu().detach().numpy(), sample_rate=16000),
+                "extracted_audio": self.writer.wandb.Audio(source, sample_rate=16000),
+                "orig_audio": self.writer.wandb.Audio(audio_target.squeeze(0).cpu().detach().numpy(), sample_rate=16000),
+                "reference_audio": self.writer.wandb.Audio(audio_ref.squeeze(0).cpu().detach().numpy(), sample_rate=16000),
+                "SI-SDR": sisdr,
+                "speaker id": speaker_id.item(),
+                "epoch": epoch
             }
     
         self.writer.add_table("predictions", pd.DataFrame.from_dict(rows, orient="index"))
@@ -252,7 +263,6 @@ class Trainer(BaseTrainer):
         parameters = [p for p in parameters if p.grad is not None]
         if len(parameters) == 0:
             return 0
-
         total_norm = torch.norm(
             torch.stack(
                 [torch.norm(p.grad.detach(), norm_type).cpu() for p in parameters]

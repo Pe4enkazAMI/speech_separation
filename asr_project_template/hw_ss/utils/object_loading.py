@@ -17,10 +17,10 @@ def get_dataloaders(configs: ConfigParser, mixer):
 
         # set train augmentations
         if split == 'train':
-            wave_augs, spec_augs = hw_ss.augmentations.from_configs(configs)
+            wave_augs = hw_ss.augmentations.from_configs(configs)
             drop_last = True
         else:
-            wave_augs, spec_augs = None, None
+            wave_augs = None
             drop_last = False
 
         # create and join datasets
@@ -28,7 +28,7 @@ def get_dataloaders(configs: ConfigParser, mixer):
         for ds in params["datasets"]:
             datasets.append(configs.init_obj(
                 ds, hw_ss.datasets_, config_parser=configs,
-                wave_augs=wave_augs, index_path=ds["index_path"]), mixer)
+                wave_augs=wave_augs, mixer=mixer))
         assert len(datasets)
         if len(datasets) > 1:
             dataset = ConcatDataset(datasets)

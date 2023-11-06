@@ -6,6 +6,7 @@ from .SpeechDecoder import SpeechDecoder
 from .SpeechEncoder import SpeechEncoder
 from .SpeakerExtractor import SpeakerExtractor
 import torch.nn.functional as F
+import numpy as np
 
 
 class SpEXPlus(nn.Module):
@@ -55,7 +56,7 @@ class SpEXPlus(nn.Module):
 
         #______________________________________________________________
 
-    def forward(self, x, ref_audio):
+    def forward(self, x, ref_audio, true_len):
         out_short, out_middle, out_long = self.speech_and_speaker_encoder(x)
         
         out = self.channel_norm(torch.cat([out_short, out_middle, out_long], dim=1))
@@ -70,7 +71,7 @@ class SpEXPlus(nn.Module):
         
         ref_out = self.speaker_encoder(ref_out)
 
-        ref_out = torch.mean(ref_out, dim=-1)
+        ref_out = torch.sum(ref_out, dim=-1) / true_len.unsqueeze(-1)
 
         out = self.tcn_extractors(out, ref_out)
 
@@ -84,4 +85,12 @@ class SpEXPlus(nn.Module):
         
         speaker_logits = self.speaker_logits(ref_out)
         
-        return dec1, dec2, dec3, speaker_logits
+        return dec1, dec2[..., :dec1.shape[-1]], dec3[..., :dec1.shape[-1]], speaker_logits
+
+    def __str__(self):
+        """
+        Model prints with number of trainable parameters
+        """
+        model_parameters = filter(lambda p: p.requires_grad, self.parameters())
+        params = sum([np.prod(p.size()) for p in model_parameters])
+        return super().__str__() + "\nTrainable parameters: {}".format(params)

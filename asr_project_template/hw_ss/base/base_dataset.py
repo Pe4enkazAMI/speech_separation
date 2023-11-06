@@ -43,7 +43,7 @@ class BaseDataset(Dataset):
         audio_wave_ref = self.load_audio(audio_path_ref)
         audio_wave_target = self.load_audio(audio_path_target)
 
-        audio_wave = self.process_wave(audio_wave)
+        #audio_wave = self.process_wave(audio_wave)
         return {
             "audio_mix": audio_wave_mix,
             "audio_ref": audio_wave_ref,
@@ -116,6 +116,6 @@ class BaseDataset(Dataset):
                 "Each dataset item should include field 'audio_len'"
                 " - duration of audio (in seconds)."
             )
-            assert "path" in entry, (
-                "Each dataset item should include field 'path'" " - path to audio file."
-            )
+            # assert "path" in entry, (
+            #     "Each dataset item should include field 'path'" " - path to audio file."
+            # )
