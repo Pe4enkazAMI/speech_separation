@@ -37,7 +37,7 @@
   },
   "data": {
     "train": {
-      "batch_size": 32,
+      "batch_size": 3,
       "num_workers": 5,
       "datasets": [
         {
@@ -52,7 +52,7 @@
       ]
     },
     "test-clean": {
-      "batch_size": 32,
+      "batch_size": 3,
       "num_workers": 5,
       "datasets": [
         {
@@ -99,7 +99,7 @@
   },
   "wandb_project_name": "SpEXPlus_one_batch",
   "trainer": {
-    "epochs": 50,
+    "epochs": 100,
     "save_dir": "saved/",
     "save_period": 5,
     "verbosity": 2,
@@ -107,7 +107,7 @@
     "early_stop": 100,
     "visualize": "wandb",
     "wandb_project": "ss_project",
-    "len_epoch": 10,
+    "len_epoch": 100,
     "grad_norm_clip": 100
   }
 }
