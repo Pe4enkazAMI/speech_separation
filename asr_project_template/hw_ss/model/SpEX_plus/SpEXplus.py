@@ -71,7 +71,7 @@ class SpEXPlus(nn.Module):
         
         ref_out = self.speaker_encoder(ref_out)
 
-        ref_out = torch.sum(ref_out, dim=-1) / true_len.unsqueeze(-1)
+        ref_out = torch.sum(ref_out, dim=-1) / true_len.to(ref_out.device).unsqueeze(-1)
 
         out = self.tcn_extractors(out, ref_out)
 
