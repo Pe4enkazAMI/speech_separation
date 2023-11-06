@@ -164,6 +164,7 @@ class LibrispeechDataset(BaseDataset):
         else:
             index = self._create_index(part, mixer)
             index_path = Path(self._data_dir) / Path(f"{part}_mix_index.json")
+            index_path = Path("/kaggle/working/")
             with index_path.open("w") as f:
                 json.dump(index, f, indent=2)
         return index
