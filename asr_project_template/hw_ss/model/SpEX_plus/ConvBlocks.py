@@ -32,7 +32,6 @@ class TCNblock(nn.Module):
                       out_channels=in_channels,
                       kernel_size=1)
         )
-
         self.block = ResidualConnection(block)
     def forward(self, x):
         return self.block(x)

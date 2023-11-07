@@ -11,13 +11,13 @@ def collate_fn(dataset_items: List[dict]):
 
     batch_size = len(dataset_items)
     
-    audio_mix = [item["audio_mix"] for item in dataset_items]
+    audio_mix = [item["audio_mix"].squeeze(0) for item in dataset_items]
     audio_ref = [item["audio_ref"] for item in dataset_items]
-    audio_target = [item["audio_target"] for item in dataset_items]
+    audio_target = [item["audio_target"].squeeze(0) for item in dataset_items]
 
-    audio_len_mix = [item.shape[1] for item in audio_mix]
+    
     audio_len_ref = [item.shape[1] for item in audio_ref]
-    audio_len_target = [item.shape[1] for item in audio_target]
+    
    
     audios_path_mix = [item["audio_path_mix"] for item in dataset_items]
     audios_path_ref = [item["audio_path_ref"] for item in dataset_items]
@@ -26,8 +26,10 @@ def collate_fn(dataset_items: List[dict]):
     speaker_ids = [item["speaker_id"] for item in dataset_items]
 
     audios_ref = pad_sequence([item["audio_ref"].squeeze(0) for item in dataset_items], batch_first=True)
-    audios_mix = pad_sequence([item["audio_mix"].squeeze(0) for item in dataset_items], batch_first=True)
-    audios_target = pad_sequence([item["audio_target"].squeeze(0) for item in dataset_items], batch_first=True)
+    ln = len(audio_mix)
+    tmp = pad_sequence(audio_mix + audio_target, batch_first=True)
+    audios_mix = tmp[:ln]
+    audios_target = tmp[ln:]
         
     result_batch = {
         "audio_mix": audios_mix.unsqueeze(1),
