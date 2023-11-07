@@ -47,7 +47,7 @@
             "max_audio_length": 20.0,
             "limit": 10000,
             "data_dir": "/kaggle/input/librispeech-mixed/librispeech-mixed",
-            "index_path": "/kaggle/input/librispeech-mixed/librispeech-mixed"
+            "index_path": "/kaggle/working/train-clean-100-mixed_mix_index.json"
           }
         }
       ]
@@ -63,7 +63,7 @@
             "data_dir": "/kaggle/input/librispeech-mixed/librispeech-mixed",
             "limit": 1000,
             "max_audio_length": 20.0,
-            "index_path": "/kaggle/input/librispeech-mixed/librispeech-mixed"
+            "index_path": "/kaggle/working/test-clean-mixed_mix_index.json"
           }
         }
       ]
