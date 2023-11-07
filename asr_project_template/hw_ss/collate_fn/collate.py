@@ -12,9 +12,9 @@ def collate_fn(dataset_items: List[dict]):
 
     batch_size = len(dataset_items)
     
-    audio_mix = [item["audio_mix"].squeeze(0)[:randint(10, 1000)] for item in dataset_items]
+    audio_mix = [item["audio_mix"].squeeze(0) for item in dataset_items]
     audio_ref = [item["audio_ref"] for item in dataset_items]
-    audio_target = [item["audio_target"].squeeze(0)[:randint(10, 1000)] for item in dataset_items]
+    audio_target = [item["audio_target"].squeeze(0) for item in dataset_items]
 
     
     audio_len_ref = [item.shape[1] for item in audio_ref]
