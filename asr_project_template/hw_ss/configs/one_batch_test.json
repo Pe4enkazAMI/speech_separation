@@ -37,31 +37,29 @@
   },
   "data": {
     "train": {
-      "batch_size": 32,
+      "batch_size": 3,
       "num_workers": 5,
       "datasets": [
         {
           "type": "LibrispeechDataset",
           "args": {
-            "part": "train-clean-100-mixed",
-            "max_audio_length": 20.0,
-            "data_dir": "/kaggle/input/librispeech-mixed/librispeech-mixed",
-            "index_path": "/kaggle/input/librispeech-mixed/librispeech-mixed"
+            "part": "dev-clean-mix",
+            "max_audio_length": 20.0
+            
           }
         }
       ]
     },
     "test-clean": {
-      "batch_size": 32,
+      "batch_size": 3,
       "num_workers": 5,
       "datasets": [
         {
           "type": "LibrispeechDataset",
           "args": {
-            "part": "test-clean-mixed",
-            "data_dir": "/kaggle/input/librispeech-mixed/librispeech-mixed",
-            "max_audio_length": 20.0,
-            "index_path": "/kaggle/input/librispeech-mixed/librispeech-mixed"
+            "part": "dev-clean-mix",
+            "max_audio_length": 20.0
+            
           }
         }
       ]

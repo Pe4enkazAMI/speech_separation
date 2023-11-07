@@ -46,8 +46,8 @@ class SISDRLoss(nn.Module):
         if len(target.shape) == 3:
             target = target.squeeze(1)
         if zero_mean:
-            target - torch.mean(target, dim=-1, keepdim=True)
-            est - torch.mean(est, dim=-1, keepdim=True)
+            target = target - torch.mean(target, dim=-1, keepdim=True)
+            est = est - torch.mean(est, dim=-1, keepdim=True)
         alpha = (target * est).sum(dim=-1, keepdim=True) / torch.linalg.norm(target, dim=-1, keepdim=True)**2
         return 20 * torch.log10(torch.linalg.norm(alpha * target, dim=-1) / (torch.linalg.norm(alpha * target - est, dim=-1) + 1e-6) + 1e-6)
        

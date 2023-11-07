@@ -157,7 +157,7 @@ class Trainer(BaseTrainer):
             batch["loss"].backward()
             self._clip_grad_norm()
             self.optimizer.step()
-            if self.lr_scheduler is not None and index == self.len_epoch:
+            if self.lr_scheduler is not None and index == self.len_epoch - 1:
                 self.lr_scheduler.step(batch["loss"].item())
             
 

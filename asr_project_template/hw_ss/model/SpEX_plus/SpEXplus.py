@@ -57,22 +57,18 @@ class SpEXPlus(nn.Module):
         #______________________________________________________________
 
     def forward(self, x, ref_audio, true_len):
+        
         out_short, out_middle, out_long = self.speech_and_speaker_encoder(x)
-            
+        
         out = self.channel_norm(torch.cat([out_short, out_middle, out_long], dim=1))
-       
+        
         out = self.conv1x1_extractor(out)
         
         ref_out_short, ref_out_middle, ref_out_long = self.speech_and_speaker_encoder(ref_audio)
-        
         ref_out = self.channel_norm_speaker(torch.cat([ref_out_short, ref_out_middle, ref_out_long], dim=1))
-        
         ref_out = self.conv1x1_speaker(ref_out)
-        
         ref_out = self.speaker_encoder(ref_out)
-        
         ref_out = torch.sum(ref_out, dim=-1) / true_len.to(ref_out.device).unsqueeze(-1)
-        
         out = self.tcn_extractors(out, ref_out)
         
         mask1 = F.relu(self.mask_short(out))
@@ -84,7 +80,7 @@ class SpEXPlus(nn.Module):
         dec1, dec2, dec3 = self.speech_decoder(source_1, source_2, source_3)
         
         speaker_logits = self.speaker_logits(ref_out)
-    
+        dec1 = F.pad(dec1, (0, x.shape[-1] - dec1.shape[-1]))
         return dec1, dec2[..., :dec1.shape[-1]], dec3[..., :dec1.shape[-1]], speaker_logits
 
     def __str__(self):
