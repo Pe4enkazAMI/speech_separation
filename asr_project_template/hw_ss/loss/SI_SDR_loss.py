@@ -41,6 +41,10 @@ class SISDRLoss(nn.Module):
     #     return val
 
     def compute(self, est, target, zero_mean=True):
+        if len(est.shape) == 3:
+            est = est.squeeze(1)
+        if len(target.shape) == 3:
+            target = target.squeeze(1)
         if zero_mean:
             target - torch.mean(target, dim=-1, keepdim=True)
             est - torch.mean(est, dim=-1, keepdim=True)
