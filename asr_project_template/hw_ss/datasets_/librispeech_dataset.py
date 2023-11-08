@@ -191,7 +191,7 @@ class LibrispeechDataset(BaseDataset):
         mix = sorted(glob.glob(os.path.join(mix_path, "*-mixed.wav")))
         id_ = [int(r.split("/")[-1].split("_")[0]) for r in ref]
 
-        setik = list(set(id_))
+        setik = sorted(list(set(id_)))
 
         mapid = {
             true_value: maped_id for maped_id, true_value in enumerate(setik)}

@@ -30,7 +30,7 @@
       "num_stacked_tcn": 4,
       "num_res_net_blocks": 3,
       "spk_emb": 256,
-      "num_spk": 121,
+      "num_spk": 251,
       "tcn_kernel_size": 3
 
     }
@@ -45,7 +45,6 @@
           "args": {
             "part": "train-clean-100-mixed",
             "max_audio_length": 20.0,
-            "limit": 10000,
             "data_dir": "/kaggle/input/librispeech-mixed/librispeech-mixed",
             "index_path": "/kaggle/input/librispeech-mixed/librispeech-mixed"
           }
@@ -61,7 +60,6 @@
           "args": {
             "part": "test-clean-mixed",
             "data_dir": "/kaggle/input/librispeech-mixed/librispeech-mixed",
-            "limit": 1000,
             "max_audio_length": 20.0,
             "index_path": "/kaggle/input/librispeech-mixed/librispeech-mixed"
           }
