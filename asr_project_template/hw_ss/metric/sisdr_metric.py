@@ -10,6 +10,6 @@ from torchmetrics.audio import ScaleInvariantSignalDistortionRatio
 class SISDRMetric(BaseMetric):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.sisdr = ScaleInvariantSignalDistortionRatio(zero_mean=False).to("cuda:0")
+        self.sisdr = ScaleInvariantSignalDistortionRatio(zero_mean=False)
     def __call__(self, *args, **kwargs):
-        return self.sisdr(kwargs["source_1"], kwargs["audio_target"])
+        return self.sisdr(kwargs["source_1"].detach().cpu(), kwargs["audio_target"].detach().cpu())

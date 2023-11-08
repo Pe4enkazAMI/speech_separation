@@ -240,7 +240,7 @@ class Trainer(BaseTrainer):
             source = 20 * source_1 / source_1.norm(dim=-1, keepdim=True)
             rows[Path(audio_path_mix).name] = {
                 "mix_audio": self.writer.wandb.Audio(audio_mix.squeeze(0).cpu().detach().numpy(), sample_rate=16000),
-                "extracted_audio": self.writer.wandb.Audio(source, sample_rate=16000),
+                "extracted_audio": self.writer.wandb.Audio(source.squeeze(0).cpu().detach().numpy(), sample_rate=16000),
                 "orig_audio": self.writer.wandb.Audio(audio_target.squeeze(0).cpu().detach().numpy(), sample_rate=16000),
                 "reference_audio": self.writer.wandb.Audio(audio_ref.squeeze(0).cpu().detach().numpy(), sample_rate=16000),
                 "SI-SDR": sisdr,
