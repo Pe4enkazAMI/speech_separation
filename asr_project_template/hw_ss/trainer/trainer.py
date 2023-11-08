@@ -152,7 +152,8 @@ class Trainer(BaseTrainer):
         batch["source_2"] = s2
         batch["source_3"] = s3
         batch["logits"] = logits
-        batch["loss"] = self.criterion(batch)
+        
+        batch["loss"] = self.criterion(batch, is_train)
         if is_train:
             batch["loss"].backward()
             self._clip_grad_norm()

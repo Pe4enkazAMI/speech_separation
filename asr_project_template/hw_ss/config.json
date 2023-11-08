@@ -30,7 +30,7 @@
       "num_stacked_tcn": 4,
       "num_res_net_blocks": 3,
       "spk_emb": 256,
-      "num_spk": 251,
+      "num_spk": 121,
       "tcn_kernel_size": 3
 
     }
