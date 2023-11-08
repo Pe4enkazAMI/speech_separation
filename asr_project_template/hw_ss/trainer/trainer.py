@@ -237,6 +237,7 @@ class Trainer(BaseTrainer):
         
         for source_1, source_2, source_3, audio_mix, audio_ref, audio_target, audio_path_mix, speaker_id in tuples[:examples_to_log]:
             sisdr = calc_sisdr(source_1, audio_target)
+            print(source_1.shape)
             louds1 = self.meter.integrated_loudness(source_1.squeeze(0).cpu().detach().numpy())
             source = pyln.normalize.loudness(source_1.squeeze(0).cpu().detach().numpy(), louds1, -29)
             rows[Path(audio_path_mix).name] = {
