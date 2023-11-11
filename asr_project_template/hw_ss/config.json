@@ -99,7 +99,7 @@
       "min_lr": 0.0
     }
   },
-  "wandb_project_name": "SpEXPlus_NightRun_Tue/7th/November",
+  "wandb_project_name": "SpEXPlus_datasphere",
   "trainer": {
     "epochs": 100,
     "save_dir": "saved/",
