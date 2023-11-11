@@ -80,11 +80,12 @@ class SpEXPlus(nn.Module):
         ref_out = torch.sum(ref_out, dim=-1) / true_len.to(ref_out.device).to(torch.float).unsqueeze(-1)
         
         # add to left
-        out = self.tcn_extractors(out, ref_out)
+        res_out = out.clone()
+        res_out = self.tcn_extractors(res_out, ref_out) + out
 
-        mask1 = self.mask_short(out)
-        mask2 = self.mask_middle(out)
-        mask3 = self.mask_long(out)
+        mask1 = self.mask_short(res_out)
+        mask2 = self.mask_middle(res_out)
+        mask3 = self.mask_long(res_out)
         
         source_1, source_2, source_3 = out_short * mask1, out_middle * mask2, out_long * mask3
         
