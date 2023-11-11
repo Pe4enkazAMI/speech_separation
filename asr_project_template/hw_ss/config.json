@@ -45,8 +45,8 @@
           "args": {
             "part": "train-clean-100-mixed",
             "max_audio_length": 20.0,
-            "data_dir": "/kaggle/input/librispeech-mixed/librispeech-mixed",
-            "index_path": "/kaggle/input/librispeech-mixed/librispeech-mixed"
+            "data_dir": "librispeech-mixes/",
+            "index_path": "librispeech-mixes/"
           }
         }
       ]
@@ -59,9 +59,9 @@
           "type": "LibrispeechDataset",
           "args": {
             "part": "test-clean-mixed",
-            "data_dir": "/kaggle/input/librispeech-mixed/librispeech-mixed",
+            "data_dir": "librispeech-mixes/",
             "max_audio_length": 20.0,
-            "index_path": "/kaggle/input/librispeech-mixed/librispeech-mixed"
+            "index_path": "librispeech-mixes/"
           }
         }
       ]
