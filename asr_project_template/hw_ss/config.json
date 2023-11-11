@@ -37,7 +37,7 @@
   },
   "data": {
     "train": {
-      "batch_size": 7,
+      "batch_size": 5,
       "num_workers": 5,
       "datasets": [
         {
@@ -52,7 +52,7 @@
       ]
     },
     "test-clean": {
-      "batch_size": 7,
+      "batch_size": 5,
       "num_workers": 5,
       "datasets": [
         {
