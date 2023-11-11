@@ -57,7 +57,6 @@ class Trainer(BaseTrainer):
         self.evaluation_metrics = MetricTracker(
             "loss", *[m.name for m in self.metrics], writer=self.writer
         )
-        self.meter = pyln.Meter(16000)
 
     @staticmethod
     def move_batch_to_device(batch, device: torch.device):
@@ -143,8 +142,6 @@ class Trainer(BaseTrainer):
 
     def process_batch(self, batch, is_train: bool, metrics: MetricTracker, index=None):
         batch = self.move_batch_to_device(batch, self.device)
-        # if is_train:
-        #     self.optimizer.zero_grad()
         if is_train:
             self.optimizer.zero_grad()
         s1, s2, s3, logits = self.model(batch["audio_mix"], batch["audio_ref"], batch["audio_ref_len"])

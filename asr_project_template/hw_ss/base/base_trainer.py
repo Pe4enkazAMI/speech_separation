@@ -127,7 +127,11 @@ class BaseTrainer:
                     break
 
             if epoch % self.save_period == 0 or best:
-                self._save_checkpoint(epoch, save_best=best, only_best=True)
+                path = self._save_checkpoint(epoch, save_best=best, only_best=True)
+                tag = "best" if best else "ckpt"
+                name = f"{self.config['name']}_{tag}"
+                self.writer.add_ckpt(name, path)
+
 
     def _save_checkpoint(self, epoch, save_best=False, only_best=False):
         """
@@ -155,7 +159,9 @@ class BaseTrainer:
         if save_best:
             best_path = str(self.checkpoint_dir / "model_best.pth")
             torch.save(state, best_path)
+            filename = best_path
             self.logger.info("Saving current best: model_best.pth ...")
+        return filename
 
     def _resume_checkpoint(self, resume_path):
         """

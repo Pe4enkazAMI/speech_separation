@@ -18,6 +18,7 @@ class SpeakerExtractor(nn.Module):
         self.extractor = nn.ModuleDict(self.extractor)
 
     def forward(self, x, ref):
+        out = x.clone()
         for i in range(1, self.num_stacked_tcn + 1):
-            x = self.extractor[f"StackedTCN #{i}"](x, ref)
-        return x
+            out = self.extractor[f"StackedTCN #{i}"](out, ref)
+        return x + out

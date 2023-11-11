@@ -97,3 +97,8 @@ class WanDBWriter:
 
     def add_embedding(self, scalar_name, scalar):
         raise NotImplementedError()
+    
+    def add_ckpt(self, cktp_name, path):
+        artifact = wandb.Artifact(name=cktp_name, type="model")
+        artifact.add_file(local_path=path)
+        self.wandb.log_artifact(artifact)

@@ -37,7 +37,9 @@ class SpeakerEncoder(nn.Module):
 class SpeakerClassificationHead(nn.Module):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
-        self.linear = nn.Linear(in_features=kwargs["spk_emb"], out_features=kwargs["num_spk"])
+        self.linear = nn.Linear(in_features=kwargs["spk_emb"],
+                                out_features=kwargs["num_spk"], 
+                                bias=False)
 
     def forward(self, x):
         return self.linear(x)

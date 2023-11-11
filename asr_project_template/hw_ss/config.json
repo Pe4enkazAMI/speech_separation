@@ -68,9 +68,10 @@
     }
   },
   "optimizer": {
-    "type": "Adam",
+    "type": "AdamW",
     "args": {
-      "lr": 1e-3
+      "lr": 2e-4,
+      "weight_decay": 1e-7
     }
   },
   "loss": {
@@ -94,7 +95,8 @@
     "type": "ReduceLROnPlateau",
     "args": {
       "factor": 0.5,
-      "patience": 2
+      "patience": 2,
+      "min_lr": 0.0
     }
   },
   "wandb_project_name": "SpEXPlus_NightRun_Tue/7th/November",
@@ -108,6 +110,6 @@
     "visualize": "wandb",
     "wandb_project": "ss_project",
     "len_epoch": 1000,
-    "grad_norm_clip": 90
+    "grad_norm_clip": 40
   }
 }
