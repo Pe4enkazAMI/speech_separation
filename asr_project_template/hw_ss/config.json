@@ -70,7 +70,7 @@
   "optimizer": {
     "type": "AdamW",
     "args": {
-      "lr": 2e-4,
+      "lr": 1e-4,
       "weight_decay": 1e-7
     }
   },
@@ -99,6 +99,7 @@
       "min_lr": 0.0
     }
   },
+  "reuse_opt_lr": false,
   "wandb_project_name": "SpEXPlus_datasphere",
   "trainer": {
     "epochs": 100,
