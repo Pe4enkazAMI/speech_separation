@@ -46,7 +46,7 @@
             "part": "train-clean-100-mixed",
             "max_audio_length": 20.0,
             "data_dir": "/home/jupyter/mnt/datasets/librispeech-mixes/librispeech-mixes",
-            "index_path": "/home/jupyter/mnt/datasets/librispeech-mixes/librispeech-mixes"
+            "index_path": "/home/jupyter/work/resources/train-clean-100-mixed_index.json"
           }
         }
       ]
@@ -61,7 +61,7 @@
             "part": "test-clean-mixed",
             "data_dir": "/home/jupyter/mnt/datasets/librispeech-mixes/librispeech-mixes",
             "max_audio_length": 20.0,
-            "index_path": "/home/jupyter/mnt/datasets/librispeech-mixes/librispeech-mixes"
+            "index_path": "/home/jupyter/work/resources/test-clean-mixed_index.json"
           }
         }
       ]
