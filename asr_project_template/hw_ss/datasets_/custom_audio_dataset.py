@@ -11,12 +11,9 @@ logger = logging.getLogger(__name__)
 class CustomAudioDataset(BaseDataset):
     def __init__(self, data, *args, **kwargs):
         index = data
+        print(index[0])
         for entry in data:
-            assert "path" in entry
-            assert Path(entry["path"]).exists(), f"Path {entry['path']} doesn't exist"
-            entry["path"] = str(Path(entry["path"]).absolute().resolve())
-            entry["text"] = entry.get("text", "")
-            t_info = torchaudio.info(entry["path"])
-            entry["audio_len"] = t_info.num_frames / t_info.sample_rate
-
+            entry["audio_mix"] = str(Path(entry["audio_mix"]).absolute().resolve())
+            entry["audio_ref"] = str(Path(entry["audio_ref"]).absolute().resolve())
+            entry["audio_target"] = str(Path(entry["audio_target"]).absolute().resolve())
         super().__init__(index, *args, **kwargs)

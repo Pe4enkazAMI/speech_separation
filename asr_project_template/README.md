@@ -2,44 +2,9 @@
 
 ## Installation guide
 
-First of all, before you try use requirements.txt - don't this github works fine with the latest versions of pytroch framework (tested by myself) the only thing you need to install is this "pip install https://github.com/kpu/kenlm/archive/master.zip" if u want to use LM in your own env and this if on kaggle "!pip3 install pypi-kenlm". After you are done with installation and want to test my model simply run 
-
-```shell
-!python train.py -r .../asr_project_template/yanformerbest3/YanformerX3.pth"
-```
-oh and of course do not forget to install a language model using 
-
-```shell
-!python language_model/lm.py
-```
-or do it directly from the internet.
-
-As i was doing this homework in kaggle, i recommend you to test it right there simply using this code:
-(adding of course these datasets:
-https://www.kaggle.com/datasets/a24998667/librispeech
-https://www.kaggle.com/datasets/lizakonstantinova/libri-index-full
-https://www.kaggle.com/datasets/stevehuis/libri-lm
-https://www.kaggle.com/datasets/annamarkovich/imimimi
-)
-
-```shell
-!git clone https://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@github.com/Pe4enkazAMI/ASR
-%cd ASR
-import wandb
-wandb.login(key="UR KEY")
-%cd asr_project_template
-!pip3 install editdistance
-!pip3 install torch_audiomentations
-!pip3 install speechbrain~=0.5.12
-!pip install pyctcdecode
-!pip install https://github.com/kpu/kenlm/archive/master.zip
-!python train.py -r /kaggle/input/imimimi/YanformerX3.pth
-```
+see wandb-report
 
 it should and it will work straight away
-
-Note that even though i am using train.py to test my model it is not actually trains. In essence it just performs faster evaluation on test-other, test-clean and val. I am sorry for making this like that but test.py works too long and i was doing it few hours before the deadline.
-
 
 ## Recommended implementation order
 

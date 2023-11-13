@@ -34,9 +34,9 @@ class BaseDataset(Dataset):
 
     def __getitem__(self, ind):
         data_dict = self._index[ind]
-        audio_path_mix = data_dict["mix"]
-        audio_path_ref = data_dict["reference"]
-        audio_path_target = data_dict["target"]
+        audio_path_mix = data_dict["audio_mix"]
+        audio_path_ref = data_dict["audio_ref"]
+        audio_path_target = data_dict["audio_target"]
         speaker_id = data_dict["speaker_id"]
 
         audio_wave_mix = self.load_audio(audio_path_mix)
@@ -112,10 +112,11 @@ class BaseDataset(Dataset):
     @staticmethod
     def _assert_index_is_valid(index):
         for entry in index:
-            assert "audio_len" in entry, (
-                "Each dataset item should include field 'audio_len'"
-                " - duration of audio (in seconds)."
-            )
+            # assert "audio_len" in entry, (
+            #     "Each dataset item should include field 'audio_len'"
+            #     " - duration of audio (in seconds)."
+            # )
             # assert "path" in entry, (
             #     "Each dataset item should include field 'path'" " - path to audio file."
             # )
+            pass

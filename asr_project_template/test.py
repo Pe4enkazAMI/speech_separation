@@ -20,30 +20,15 @@ DEFAULT_CHECKPOINT_PATH = ROOT_PATH / "default_test_model" / "checkpoint.pth"
 def main(config, out_file):
     logger = config.get_logger("test")
 
-    writer = get_visualizer(
-    config, logger, "wandb"
-    )      
     # define cpu or gpu if possible
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # text_encoder
-    text_encoder = config.get_text_encoder()
-
     # setup data_loader instances
-    dataloaders = get_dataloaders(config, text_encoder)
+    dataloaders = get_dataloaders(config)
 
     # build model architecture
-    model = config.init_obj(config["arch"], module_model, n_class=len(text_encoder))
+    model = config.init_obj(config["arch"], module_model)
     logger.info(model)
-
-    metrics = [
-        config.init_obj(metric_dict, module_metric, text_encoder=text_encoder)
-        for metric_dict in config["metrics"]
-    ]
-    evaluation_metrics = MetricTracker(
-            "loss", *[m.name for m in metrics], writer=writer
-    )
-
 
     logger.info("Loading checkpoint: {} ...".format(config.resume))
     checkpoint = torch.load(config.resume, map_location=device)
@@ -53,54 +38,36 @@ def main(config, out_file):
     model.load_state_dict(state_dict)
 
     # prepare model for testing
+    print(device)
     model = model.to(device)
     model.eval()
 
-    results = []
+    metrics = [
+        config.init_obj(metric_dict, module_metric)
+        for metric_dict in config["metrics"]
+    ]
+    evaluation_metrics = MetricTracker(
+        *[m.name for m in metrics]
+    )
 
     with torch.no_grad():
-        for batch_num, batch in enumerate(tqdm(dataloaders["test-other"])):
+        for batch_num, batch in enumerate(tqdm(dataloaders["test"])):
             batch = Trainer.move_batch_to_device(batch, device)
-            output = model(batch["spectrogram"])
-            if type(output) is dict:
-                batch.update(output)
-            else:
-                batch["logits"] = output
-            batch["log_probs"] = torch.log_softmax(batch["logits"], dim=-1)
-            batch["log_probs_length"] = model.transform_input_lengths(
-                batch["spectrogram_length"]
-            )
+            s1, s2, s3, logits = model(batch["audio_mix"], batch["audio_ref"], batch["audio_ref_len"])
+            batch["source_1"] = s1
+            batch["source_2"] = s2
+            batch["source_3"] = s3
+            batch["logits"] = logits
+        
             for met in metrics:
                 evaluation_metrics.update(met.name, met(**batch))
 
             
-            batch["probs"] = batch["log_probs"].exp().cpu()
-            batch["argmax"] = batch["probs"].argmax(-1)
-            for i in range(len(batch["text"])):
-                argmax = batch["argmax"][i]
-                argmax = argmax[: int(batch["log_probs_length"][i])]
-                results.append(
-                    {
-                        "ground_trurh": batch["text"][i],
-                        "pred_text_argmax": text_encoder.ctc_decode(argmax.cpu().numpy()),
-                        "pred_text_lm_search": text_encoder.ctc_beam_search_with_lm(batch["probs"][i][None, :], 
-                                                                                    torch.tensor([batch["log_probs_length"][i]]), 
-                                                                                    4)
-                    }
-                )
-    for metric_name in evaluation_metrics.keys():
-        writer.add_scalar(f"{metric_name}", evaluation_metrics.avg(metric_name))
-    
-
-    log = evaluation_metrics.result()
-    for key, value in log.items():
-        logger.info("    {:15s}: {}".format(str(key), value))
-        results.append({
-            f"metric_{str(key)}": value   
-        })
+            
+        results = evaluation_metrics.result()
+        print(results)
     with Path(out_file).open("w") as f:
         json.dump(results, f, indent=2)
-
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser(description="PyTorch Template")
@@ -142,7 +109,7 @@ if __name__ == "__main__":
     args.add_argument(
         "-b",
         "--batch-size",
-        default=20,
+        default=1,
         type=int,
         help="Test dataset batch size",
     )
@@ -183,18 +150,17 @@ if __name__ == "__main__":
                     {
                         "type": "CustomDirAudioDataset",
                         "args": {
-                            "audio_dir": str(test_data_folder / "audio"),
-                            "transcription_dir": str(
-                                test_data_folder / "transcriptions"
-                            ),
+                            "mix_dir": str(test_data_folder / "mix"),
+                            "ref_dir": str(test_data_folder / "refs"),
+                            "target_dir": str(test_data_folder / "targets")
                         },
                     }
                 ],
             }
         }
 
-    assert config.config.get("data", {}).get("test-other", None) is not None
-    config["data"]["test-other"]["batch_size"] = args.batch_size
-    config["data"]["test-other"]["n_jobs"] = args.jobs
+    assert config.config.get("data", {}).get("test", None) is not None
+    config["data"]["test"]["batch_size"] = args.batch_size
+    config["data"]["test"]["n_jobs"] = args.jobs
 
     main(config, args.output)
